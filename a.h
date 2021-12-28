@@ -9,6 +9,8 @@ struct Buffer
 
 int readfile(Buffer*, char*);
 int writefile(Buffer*, char*);
+int insert(Buffer*, int);
+int append(Buffer*, int);
 
 /* COLORS */
 enum
@@ -22,5 +24,4 @@ enum
 };
 
 Image* cols[NCOLS];
-
 void initcols(int);

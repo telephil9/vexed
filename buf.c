@@ -36,7 +36,8 @@ readfile(Buffer *buf, char *filename)
 	return 0;
 }
 
-int writefile(Buffer *buf, char *filename)
+int
+writefile(Buffer *buf, char *filename)
 {
 	int fd, n;
 
@@ -48,4 +49,26 @@ int writefile(Buffer *buf, char *filename)
 		return -1;
 	close(fd);
 	return 0;
+}
+
+int
+insert(Buffer *buf, int index)
+{
+	if(buf->count == buf->size){
+		buf->size *= 1.5;
+		buf->data = realloc(buf->data, buf->size);
+		if(buf->data == nil)
+			return -1;
+	}
+	buf->count += 1;
+	memmove(&buf->data[index + 1], &buf->data[index], buf->count - index);
+	buf->data[index] = 0;
+	buf->data[buf->count] = 0;
+	return 1;
+}
+
+int
+append(Buffer *buf, int index)
+{
+	return insert(buf, index + 1);
 }

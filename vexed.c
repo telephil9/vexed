@@ -313,6 +313,19 @@ ekeyboard(Rune k)
 			redraw();
 		}
 		break;
+	case 'i':
+		lastv = -1;
+		if(insert(&buf, sel) < 0)
+			sysfatal("insert: %r");
+		eresize();
+		break;
+	case 'a':
+		lastv = -1;
+		if(append(&buf, sel) < 0)
+			sysfatal("append: %r");
+		sel += 1;
+		eresize();
+		break;
 	default:
 		if(isxdigit(k)){
 			if(e - lastk < 2 && lastv > 0) {
