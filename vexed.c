@@ -98,16 +98,18 @@ ensureselvisible(void)
 }
 
 void
-drawline(int y, int base)
+drawline(int line)
 {
-	int index, i, n;
+	int y, index, i, n;
 	char b[8] = {0}, *s;
 	Point p;
 	Point p2;
 	
-	index = base + offset*16;
+	y = viewr.min.y + line * font->height;
+	index = (line + offset)*16;
 	if(index >= buf.count)
 		return;
+	draw(screen, Rect(viewr.min.x, y, viewr.max.x, y + font->height), cols[BACK], nil, ZP);
 	p = Pt(viewr.min.x, y);
 	if(index/16 == sel/16){
 		n = snprint(b, sizeof b, "%06X", sel);
@@ -135,6 +137,23 @@ drawline(int y, int base)
 }
 
 void
+drawselchange(int oldsel)
+{
+	int ol, nl;
+
+	if(ensureselvisible())
+		redraw();
+	else{
+		ol = oldsel/16 - offset;
+		nl = sel/16 - offset;
+		if(ol != nl)
+			drawline(ol);
+		drawline(nl);
+		flushimage(display, 1);
+	}
+}
+
+void
 redraw(void)
 {
 	int i, h, y, ye;
@@ -156,7 +175,7 @@ redraw(void)
 		scrposr = insetrect(scrollr, -1);
 	draw(screen, scrposr, cols[BACK], nil, ZP);
 	for(i = 0; i < nlines; i++)
-		drawline(viewr.min.y + i * font->height, i*16);
+		drawline(i);
 	p = string(screen, Pt(statusr.min.x + Padding, statusr.min.y), cols[HEX], ZP, font, filename);
 	if(modified)
 		string(screen, p, cols[HEX], ZP, font, " (modified)");
@@ -317,10 +336,12 @@ ekeyboard(Rune k)
 	static long lastk = 0;
 	static int lastv;
 	long e;
+	int oldsel;
 
 	if(!isxdigit(k))
 		lastv = -1;
 	e = time(nil);
+	oldsel = sel;
 	switch(k){
 	case 'q':
 	case Kdel:
@@ -334,37 +355,33 @@ ekeyboard(Rune k)
 		break;
 	case Kleft:
 		if(sel > 0){
+			oldsel = sel;
 			sel--;
-			ensureselvisible();
-			redraw();
+			drawselchange(oldsel);
 		}
 		break;
 	case Kright:
 		if(sel < (buf.count - 1)){
 			sel++;
-			ensureselvisible();
-			redraw();
+			drawselchange(oldsel);
 		}
 		break;
 	case Kup:
 		if(sel >= 16){
 			sel -= 16;
-			ensureselvisible();
-			redraw();
+			drawselchange(oldsel);
 		}
 		break;
 	case Kdown:
 		if(sel < (buf.count - 16)){
 			sel += 16;
-			ensureselvisible();
-			redraw();
+			drawselchange(oldsel);
 		}
 		break;
 	case Khome:
 		if(sel != 0){
 			sel = 0;
-			ensureselvisible();
-			redraw();
+			drawselchange(oldsel);
 		}
 		break;
 	case Kend:
