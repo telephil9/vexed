@@ -258,6 +258,8 @@ ekeyboard(Rune k)
 	static int lastv;
 	long e;
 
+	if(!isxdigit(k))
+		lastv = -1;
 	e = time(nil);
 	switch(k){
 	case 'q':
