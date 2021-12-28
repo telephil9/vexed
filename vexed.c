@@ -54,6 +54,7 @@ xdelete(void)
 	if(sel == buf.count)
 		--sel;
 	modified = 1;
+	blines = buf.count/16;
 	redraw();
 }
 
@@ -63,6 +64,7 @@ xinsert(void)
 	if(insert(&buf, sel) < 0)
 		sysfatal("insert: %r");
 	modified = 1;
+	blines = buf.count/16;
 	redraw();
 }
 
@@ -73,6 +75,7 @@ xappend(void)
 		sysfatal("append: %r");
 	sel += 1;
 	modified = 1;
+	blines = buf.count/16;
 	redraw();
 }
 
