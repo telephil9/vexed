@@ -7,6 +7,8 @@
 #include <ctype.h>
 #include "a.h"
 
+void redraw(void);
+
 enum
 {
 	Emouse,
@@ -20,6 +22,10 @@ enum
 	Spacing = 8,
 	Scrollwidth = 12,
 };
+
+enum { Mdelete, Minsert, Mappend };
+char *menu2str[] = { "delete", "insert", "append", 0 };
+Menu menu2 = { menu2str };
 
 enum { Msave, Mquit, };
 char *menu3str[] = { "save", "quit", 0 };
@@ -39,6 +45,36 @@ Rectangle statusr;
 int nlines;
 int offset;
 int sel = 0;
+
+void
+xdelete(void)
+{
+	if(delete(&buf, sel) < 0)
+		sysfatal("delete: %r");
+	if(sel == buf.count)
+		--sel;
+	modified = 1;
+	redraw();
+}
+
+void
+xinsert(void)
+{
+	if(insert(&buf, sel) < 0)
+		sysfatal("insert: %r");
+	modified = 1;
+	redraw();
+}
+
+void
+xappend(void)
+{
+	if(append(&buf, sel) < 0)
+		sysfatal("append: %r");
+	sel += 1;
+	modified = 1;
+	redraw();
+}
 
 int
 selvisible(void)
@@ -167,6 +203,25 @@ indexat(Point p)
 }
 
 void
+menu2hit(void)
+{
+	int n;
+
+	n = menuhit(2, mctl, &menu2, nil);
+	switch(n){
+	case Mdelete:
+		xdelete();
+		break;
+	case Minsert:
+		xinsert();
+		break;
+	case Mappend:
+		xappend();
+		break;
+	}
+}
+
+void
 menu3hit(void)
 {
 	int n;
@@ -212,6 +267,8 @@ emouse(Mouse *m)
 				sel = n;
 				redraw();
 			}
+		}else if(m->buttons == 2){
+			menu2hit();
 		}else if(m->buttons == 4){
 			menu3hit();
 		}else if(m->buttons == 8){
@@ -317,29 +374,15 @@ ekeyboard(Rune k)
 		break;
 	case 'x':
 	case 'X':
-		if(delete(&buf, sel) < 0)
-			sysfatal("delete: %r");
-		if(sel == buf.count)
-			--sel;
-		modified = 1;
-		eresize();
+		xdelete();
 		break;
 	case 'i':
 	case 'I':
-		lastv = -1;
-		if(insert(&buf, sel) < 0)
-			sysfatal("insert: %r");
-		modified = 1;
-		eresize();
+		xinsert();
 		break;
 	case 'p':
 	case 'P':
-		lastv = -1;
-		if(append(&buf, sel) < 0)
-			sysfatal("append: %r");
-		sel += 1;
-		modified = 1;
-		eresize();
+		xappend();
 		break;
 	default:
 		if(isxdigit(k)){
