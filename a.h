@@ -9,6 +9,7 @@ struct Buffer
 
 int readfile(Buffer*, char*);
 int writefile(Buffer*, char*);
+int delete(Buffer*, int);
 int insert(Buffer*, int);
 int append(Buffer*, int);
 

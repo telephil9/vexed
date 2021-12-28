@@ -315,11 +315,21 @@ ekeyboard(Rune k)
 			redraw();
 		}
 		break;
+	case 'x':
+	case 'X':
+		if(delete(&buf, sel) < 0)
+			sysfatal("delete: %r");
+		if(sel == buf.count)
+			--sel;
+		modified = 1;
+		eresize();
+		break;
 	case 'i':
 	case 'I':
 		lastv = -1;
 		if(insert(&buf, sel) < 0)
 			sysfatal("insert: %r");
+		modified = 1;
 		eresize();
 		break;
 	case 'p':
@@ -328,6 +338,7 @@ ekeyboard(Rune k)
 		if(append(&buf, sel) < 0)
 			sysfatal("append: %r");
 		sel += 1;
+		modified = 1;
 		eresize();
 		break;
 	default:

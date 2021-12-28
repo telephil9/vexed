@@ -52,6 +52,20 @@ writefile(Buffer *buf, char *filename)
 }
 
 int
+delete(Buffer *buf, int index)
+{
+	if(index != buf->count - 1)
+		memmove(&buf->data[index], &buf->data[index + 1], buf->count - index);
+	buf->count -= 1;
+	/* TODO: is that really what we want ? */
+	if(buf->count == 0){
+		buf->count = 1;
+		buf->data[0] = 0;
+	}
+	return 0;
+}
+
+int
 insert(Buffer *buf, int index)
 {
 	if(buf->count == buf->size){
