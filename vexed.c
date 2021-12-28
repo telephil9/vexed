@@ -21,6 +21,10 @@ enum
 	Scrollwidth = 12,
 };
 
+enum { Msave, Mquit, };
+char *menu3str[] = { "save", "quit", 0 };
+Menu menu3 = { menu3str };
+
 const char	*filename;
 int modified;
 Buffer buf;
@@ -163,6 +167,27 @@ indexat(Point p)
 }
 
 void
+menu3hit(void)
+{
+	int n;
+
+	n = menuhit(3, mctl, &menu3, nil);
+	switch(n){
+	case Msave:
+		if(!modified)
+			return;
+		if(writefile(&buf, filename) < 0)
+			sysfatal("writefile: %r");
+		modified = 0;
+		redraw();
+		break;
+	case Mquit:
+		threadexitsall(nil);
+		break;
+	}
+}
+
+void
 emouse(Mouse *m)
 {
 	int n;
@@ -187,6 +212,8 @@ emouse(Mouse *m)
 				sel = n;
 				redraw();
 			}
+		}else if(m->buttons == 4){
+			menu3hit();
 		}else if(m->buttons == 8){
 			scroll(-scrollsize);
 		}else if(m->buttons == 16){

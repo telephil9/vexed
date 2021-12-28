@@ -38,7 +38,14 @@ readfile(Buffer *buf, char *filename)
 
 int writefile(Buffer *buf, char *filename)
 {
-	USED(buf);
-	USED(filename);
-	return -1;
+	int fd, n;
+
+	fd = open(filename, OWRITE|OTRUNC);
+	if(fd < 0)
+		return -1;
+	n = write(fd, buf->data, buf->count);
+	if(n < 0 || n != buf->count)
+		return -1;
+	close(fd);
+	return 0;
 }
