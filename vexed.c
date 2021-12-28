@@ -154,12 +154,25 @@ drawselchange(int oldsel)
 }
 
 void
+drawstatus(void)
+{
+	char b[16] = {0};
+	Point p;
+	int x;
+
+	p = string(screen, Pt(statusr.min.x + Padding, statusr.min.y), cols[HEX], ZP, font, filename);
+	if(modified)
+		string(screen, p, cols[HEX], ZP, font, " (modified)");
+	snprint(b, sizeof b, "%d%%", (int)((100.0 * sel) / buf.count + 0.5));
+	x = statusr.max.x - stringwidth(font, b) - Padding;
+	string(screen, Pt(x, statusr.min.y), cols[HEX], ZP, font, b);
+}
+
+void
 redraw(void)
 {
 	int i, h, y, ye;
 	Rectangle scrposr;
-	Point p;
-	char b[16] = {0};
 
 	draw(screen, screen->r, cols[BACK], nil, ZP);
 	draw(screen, scrollr, cols[SCROLL], nil, ZP);
@@ -176,12 +189,7 @@ redraw(void)
 	draw(screen, scrposr, cols[BACK], nil, ZP);
 	for(i = 0; i < nlines; i++)
 		drawline(i);
-	p = string(screen, Pt(statusr.min.x + Padding, statusr.min.y), cols[HEX], ZP, font, filename);
-	if(modified)
-		string(screen, p, cols[HEX], ZP, font, " (modified)");
-	snprint(b, sizeof b, "%d%%", (int)((100.0 * sel) / buf.count + 0.5));
-	y = statusr.max.x - stringwidth(font, b) - Padding;
-	string(screen, Pt(y, statusr.min.y), cols[HEX], ZP, font, b);
+	drawstatus();
 	flushimage(display, 1);
 }
 
@@ -414,7 +422,8 @@ ekeyboard(Rune k)
 				buf.data[sel] = lastv;
 			}
 			modified = 1;
-			redraw();
+			drawselchange(oldsel);
+			drawstatus();
 		}else{
 			lastv = -1;
 		}
