@@ -22,6 +22,7 @@ enum
 };
 
 const char	*filename;
+int modified;
 Buffer buf;
 int blines;
 Mousectl	*mctl;
@@ -95,6 +96,7 @@ redraw(void)
 {
 	int i, h, y, ye;
 	Rectangle scrposr;
+	Point p;
 	char b[16] = {0};
 
 	draw(screen, screen->r, cols[BACK], nil, ZP);
@@ -112,7 +114,9 @@ redraw(void)
 	draw(screen, scrposr, cols[BACK], nil, ZP);
 	for(i = 0; i < nlines; i++)
 		drawline(viewr.min.y + i * font->height, i*16);
-	string(screen, Pt(statusr.min.x + Padding, statusr.min.y), cols[HEX], ZP, font, filename);
+	p = string(screen, Pt(statusr.min.x + Padding, statusr.min.y), cols[HEX], ZP, font, filename);
+	if(modified)
+		string(screen, p, cols[HEX], ZP, font, " (modified)");
 	snprint(b, sizeof b, "%d%%", (int)((100.0 * sel) / buf.count + 0.5));
 	y = statusr.max.x - stringwidth(font, b) - Padding;
 	string(screen, Pt(y, statusr.min.y), cols[HEX], ZP, font, b);
@@ -208,9 +212,26 @@ eresize(void)
 	flushimage(display, 1);
 }
 
+int
+hexval(Rune k)
+{
+	int v;
+
+	if(isdigit(k))
+		v = k - '0';
+	else
+		v = 10 + tolower(k) - 'a';
+	return v;
+}
+
 void
 ekeyboard(Rune k)
 {
+	static long lastk = 0;
+	static int lastv;
+	long e;
+
+	e = time(nil);
 	switch(k){
 	case 'q':
 	case Kdel:
@@ -265,7 +286,22 @@ ekeyboard(Rune k)
 			redraw();
 		}
 		break;
+	default:
+		if(isxdigit(k)){
+			if(e - lastk < 2 && lastv > 0) {
+				buf.data[sel] = lastv*16 + hexval(k);
+				lastv = -1;
+			}else{
+				lastv = hexval(k);
+				buf.data[sel] = lastv;
+			}
+			modified = 1;
+			redraw();
+		}else{
+			lastv = -1;
+		}
 	}
+	lastk = e;
 }
 
 void
@@ -299,6 +335,7 @@ threadmain(int argc, char *argv[])
 	if(*argv == nil)
 		usage();
 	filename = *argv;
+	modified = 0;
 	if(readfile(&buf, filename) < 0)
 		sysfatal("readfile: %r");
 	blines = buf.count/16;
