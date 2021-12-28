@@ -314,12 +314,14 @@ ekeyboard(Rune k)
 		}
 		break;
 	case 'i':
+	case 'I':
 		lastv = -1;
 		if(insert(&buf, sel) < 0)
 			sysfatal("insert: %r");
 		eresize();
 		break;
-	case 'a':
+	case 'p':
+	case 'P':
 		lastv = -1;
 		if(append(&buf, sel) < 0)
 			sysfatal("append: %r");
