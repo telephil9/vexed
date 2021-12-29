@@ -220,7 +220,7 @@ xlook(void)
 		sbuf[nsbuf++] = 16*hexval(tmp[i]) + hexval(tmp[i+1]);
 	sbuf[nsbuf] = 0;
 	snprint(sstr, sizeof sstr, "/%s", tmp);
-	if(!search(0)){
+	if(!search(sel)){
 		sindex = -1;
 	}
 }
