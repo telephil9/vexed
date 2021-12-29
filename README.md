@@ -10,6 +10,8 @@ Home and End keys go to the beginning and end of the file respectively.
 `i` inserts a byte before the current selection.  
 `p` inserts a byte after the current selection.  
 `x` deletes the currently selected byte.  
+`u` undo last edit.  
+`r` redo last undo'ed edit.  
 Del or q exit the program.  
 
 **THIS IS WORK IN PROGRESS. USE AT YOUR OWN RISK**

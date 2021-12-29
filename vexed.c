@@ -8,6 +8,7 @@
 #include "a.h"
 
 void redraw(void);
+void drawselchange(int);
 
 enum
 {
@@ -23,8 +24,8 @@ enum
 	Scrollwidth = 12,
 };
 
-enum { Mgoto, Mdelete, Minsert, Mappend };
-char *menu2str[] = { "go...", "delete", "insert", "append", 0 };
+enum { Mundo, Mredo, Mgoto, Mdelete, Minsert, Mappend };
+char *menu2str[] = { "undo", "redo", "go...", "delete", "insert", "append", 0 };
 Menu menu2 = { menu2str };
 
 enum { Msave, Mquit, };
@@ -47,6 +48,73 @@ int offset;
 int sel = 0;
 
 void
+xundo(void)
+{
+	Undo u;
+
+	if(!canundo())
+		return;
+	undo(&u);
+	switch(u.action){
+	case Udelete:
+		if(insert(&buf, u.index) < 0)
+			sysfatal("insert: %r");
+		buf.data[u.index] = u.value;
+		break;
+	case Uinsert:
+		if(delete(&buf, u.index) < 0)
+			sysfatal("delete: %r");
+		break;
+	case Uappend:
+		if(delete(&buf, u.index + 1) < 0)
+			sysfatal("delete: %r");
+		break;
+	case Uset:
+		buf.data[u.index] = u.value;
+		break;
+	}
+	sel = u.index;
+	modified = 1;
+	blines = buf.count / 16;
+	redraw();
+}
+
+void
+xredo(void)
+{
+	Undo u;
+
+	if(!canredo())
+		return;
+	redo(&u);
+	switch(u.action){
+	case Udelete:
+		if(delete(&buf, u.index) < 0)
+			sysfatal("insert: %r");
+		sel = u.index;
+		break;
+	case Uinsert:
+		if(insert(&buf, u.index) < 0)
+			sysfatal("insert: %r");
+		sel = u.index;
+		break;
+	case Uappend:
+		if(insert(&buf, u.index + 1) < 0)
+			sysfatal("insert: %r");
+		sel = u.index + 1;
+		break;
+	case Uset:
+		buf.data[u.index] = u.newvalue;
+		break;
+	}
+	if(sel == buf.count)
+		--sel;
+	modified = 1;
+	blines = buf.count / 16;
+	redraw();
+}
+
+void
 xgoto(void)
 {
 	char b[16] = {0}, *endp;
@@ -66,6 +134,7 @@ xgoto(void)
 void
 xdelete(void)
 {
+	pushundo(Udelete, sel, buf.data[sel], 0);
 	if(delete(&buf, sel) < 0)
 		sysfatal("delete: %r");
 	if(sel == buf.count)
@@ -78,6 +147,7 @@ xdelete(void)
 void
 xinsert(void)
 {
+	pushundo(Uinsert, sel, 0, 0);
 	if(insert(&buf, sel) < 0)
 		sysfatal("insert: %r");
 	modified = 1;
@@ -88,6 +158,7 @@ xinsert(void)
 void
 xappend(void)
 {
+	pushundo(Uappend, sel, 0, 0);
 	if(append(&buf, sel) < 0)
 		sysfatal("append: %r");
 	sel += 1;
@@ -256,6 +327,12 @@ menu2hit(void)
 
 	n = menuhit(2, mctl, &menu2, nil);
 	switch(n){
+	case Mundo:
+		xundo();
+		break;
+	case Mredo:
+		xredo();
+		break;
 	case Mgoto:
 		xgoto();
 		break;
@@ -420,6 +497,14 @@ ekeyboard(Rune k)
 			redraw();
 		}
 		break;
+	case 'u':
+	case 'U':
+		xundo();
+		break;
+	case 'r':
+	case 'R':
+		xredo();
+		break;
 	case 'g':
 	case 'G':
 		xgoto();
@@ -440,9 +525,11 @@ ekeyboard(Rune k)
 		if(isxdigit(k)){
 			if(e - lastk < 2 && lastv > 0) {
 				buf.data[sel] = lastv*16 + hexval(k);
+				patchundo(buf.data[sel]);
 				lastv = -1;
 			}else{
 				lastv = hexval(k);
+				pushundo(Uset, sel, buf.data[sel], lastv);
 				buf.data[sel] = lastv;
 			}
 			modified = 1;
