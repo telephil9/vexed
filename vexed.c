@@ -24,8 +24,8 @@ enum
 	Scrollwidth = 12,
 };
 
-enum { Mundo, Mredo, Minsert, Mappend, Mdelete, Mgoto };
-char *menu2str[] = { "undo", "redo", "insert", "append", "delete", "goto", 0 };
+enum { Mundo, Mredo, Minsert, Mappend, Mdelete, Mgoto, Mlook, Mnext };
+char *menu2str[] = { "undo", "redo", "insert", "append", "delete", "goto", "look", "next", 0 };
 Menu menu2 = { menu2str };
 
 enum { Msave, Mquit, };
@@ -46,6 +46,44 @@ Rectangle statusr;
 int nlines;
 int offset;
 int sel = 0;
+uchar sbuf[255] = {0};
+int nsbuf;
+char  sstr[256] = {0};
+int sindex = -1;
+
+int
+hexval(Rune k)
+{
+	int v;
+
+	if(isdigit(k))
+		v = k - '0';
+	else
+		v = 10 + tolower(k) - 'a';
+	return v;
+}
+
+int
+search(int from)
+{
+	char *s, *p;
+	int oldsel;
+
+	s = (char*)buf.data + from;
+	while(s - (char*)buf.data < buf.count){
+		p = memchr(s, sbuf[0], buf.count);
+		if(p == nil || (nsbuf > 1 && memcmp(p, sbuf, nsbuf) != 0)){
+			s = p + 1;
+			continue;
+		}
+		oldsel = sel;
+		sel = p - (char*)buf.data;
+		drawselchange(oldsel);
+		sindex = sel;
+		return 1;
+	}
+	return 0;
+}
 
 void
 xundo(void)
@@ -165,6 +203,35 @@ xappend(void)
 	modified = 1;
 	blines = buf.count/16;
 	redraw();
+}
+
+void
+xlook(void)
+{
+	char tmp[255] = {0};
+	int n, i;
+
+	n = enter("Look:", tmp, sizeof tmp, mctl, kctl, nil);
+	if(n <= 0 || n%2 != 0)
+		return;
+	nsbuf = 0;
+	sindex = -1;
+	for(i = 0; i < n; i += 2)
+		sbuf[nsbuf++] = 16*hexval(tmp[i]) + hexval(tmp[i+1]);
+	sbuf[nsbuf] = 0;
+	snprint(sstr, sizeof sstr, "/%s", tmp);
+	if(!search(0)){
+		sindex = -1;
+	}
+}
+
+void
+xnext(void)
+{
+	if(sindex == -1)
+		return;
+	if(!search(sindex + 1))
+		search(0);
 }
 
 int
@@ -325,6 +392,7 @@ menu2hit(void)
 {
 	int n;
 
+	menu2str[Mnext] = sindex == -1 ? nil : sstr;
 	n = menuhit(2, mctl, &menu2, nil);
 	switch(n){
 	case Mundo:
@@ -344,6 +412,12 @@ menu2hit(void)
 		break;
 	case Mappend:
 		xappend();
+		break;
+	case Mlook:
+		xlook();
+		break;
+	case Mnext:
+		xnext();
 		break;
 	}
 }
@@ -421,18 +495,6 @@ eresize(void)
 	scrollsize = mousescrollsize(nlines);
 	redraw();
 	flushimage(display, 1);
-}
-
-int
-hexval(Rune k)
-{
-	int v;
-
-	if(isdigit(k))
-		v = k - '0';
-	else
-		v = 10 + tolower(k) - 'a';
-	return v;
 }
 
 void
@@ -520,6 +582,14 @@ ekeyboard(Rune k)
 	case 'p':
 	case 'P':
 		xappend();
+		break;
+	case 'l':
+	case 'L':
+		xlook();
+		break;
+	case 'n':
+	case 'N':
+		xnext();
 		break;
 	default:
 		if(isxdigit(k)){
