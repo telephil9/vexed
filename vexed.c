@@ -23,8 +23,8 @@ enum
 	Scrollwidth = 12,
 };
 
-enum { Mdelete, Minsert, Mappend };
-char *menu2str[] = { "delete", "insert", "append", 0 };
+enum { Mgoto, Mdelete, Minsert, Mappend };
+char *menu2str[] = { "go...", "delete", "insert", "append", 0 };
 Menu menu2 = { menu2str };
 
 enum { Msave, Mquit, };
@@ -45,6 +45,23 @@ Rectangle statusr;
 int nlines;
 int offset;
 int sel = 0;
+
+void
+xgoto(void)
+{
+	char b[16] = {0}, *endp;
+	int n;
+
+	if(enter("Go to:", b, sizeof b, mctl, kctl, nil) <= 0)
+		return;
+	n = strtol(b, &endp, 0);
+	if(endp == nil || endp == b)
+		return;
+	if(n < 0 || n >= buf.count)
+		return;
+	sel = n;
+	redraw();
+}
 
 void
 xdelete(void)
@@ -239,6 +256,9 @@ menu2hit(void)
 
 	n = menuhit(2, mctl, &menu2, nil);
 	switch(n){
+	case Mgoto:
+		xgoto();
+		break;
 	case Mdelete:
 		xdelete();
 		break;
@@ -399,6 +419,10 @@ ekeyboard(Rune k)
 				offset = blines - blines%nlines;
 			redraw();
 		}
+		break;
+	case 'g':
+	case 'G':
+		xgoto();
 		break;
 	case 'x':
 	case 'X':
