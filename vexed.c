@@ -24,8 +24,8 @@ enum
 	Scrollwidth = 12,
 };
 
-enum { Mundo, Mredo, Mgoto, Mdelete, Minsert, Mappend };
-char *menu2str[] = { "undo", "redo", "go...", "delete", "insert", "append", 0 };
+enum { Mundo, Mredo, Minsert, Mappend, Mdelete, Mgoto };
+char *menu2str[] = { "undo", "redo", "insert", "append", "delete", "goto", 0 };
 Menu menu2 = { menu2str };
 
 enum { Msave, Mquit, };
@@ -120,7 +120,7 @@ xgoto(void)
 	char b[16] = {0}, *endp;
 	int n;
 
-	if(enter("Go to:", b, sizeof b, mctl, kctl, nil) <= 0)
+	if(enter("Address:", b, sizeof b, mctl, kctl, nil) <= 0)
 		return;
 	n = strtol(b, &endp, 0);
 	if(endp == nil || endp == b)
