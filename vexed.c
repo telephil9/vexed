@@ -74,7 +74,7 @@ xundo(void)
 		break;
 	}
 	sel = u.index;
-	modified = 1;
+	modified = u.modified;
 	blines = buf.count / 16;
 	redraw();
 }
@@ -134,7 +134,7 @@ xgoto(void)
 void
 xdelete(void)
 {
-	pushundo(Udelete, sel, buf.data[sel], 0);
+	pushundo(Udelete, sel, buf.data[sel], 0, modified);
 	if(delete(&buf, sel) < 0)
 		sysfatal("delete: %r");
 	if(sel == buf.count)
@@ -147,7 +147,7 @@ xdelete(void)
 void
 xinsert(void)
 {
-	pushundo(Uinsert, sel, 0, 0);
+	pushundo(Uinsert, sel, 0, 0, modified);
 	if(insert(&buf, sel) < 0)
 		sysfatal("insert: %r");
 	modified = 1;
@@ -158,7 +158,7 @@ xinsert(void)
 void
 xappend(void)
 {
-	pushundo(Uappend, sel, 0, 0);
+	pushundo(Uappend, sel, 0, 0, modified);
 	if(append(&buf, sel) < 0)
 		sysfatal("append: %r");
 	sel += 1;
@@ -529,7 +529,7 @@ ekeyboard(Rune k)
 				lastv = -1;
 			}else{
 				lastv = hexval(k);
-				pushundo(Uset, sel, buf.data[sel], lastv);
+				pushundo(Uset, sel, buf.data[sel], lastv, modified);
 				buf.data[sel] = lastv;
 			}
 			modified = 1;

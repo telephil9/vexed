@@ -31,13 +31,14 @@ struct Undo
 	int index;
 	uchar value;
 	uchar newvalue;
+	int modified;
 };
 
 int  canundo(void);
 void undo(Undo*);
 int  canredo(void);
 void redo(Undo*);
-void pushundo(int, int, uchar, uchar);
+void pushundo(int, int, uchar, uchar, int);
 void patchundo(uchar);
 
 /* COLORS */
