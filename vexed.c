@@ -67,11 +67,14 @@ int
 search(int from)
 {
 	char *s, *p;
-	int oldsel;
+	int len, oldsel;
 
 	s = (char*)buf.data + from;
-	while(s - (char*)buf.data < buf.count){
-		p = memchr(s, sbuf[0], buf.count);
+	for(;;){
+		len = s - (char*)buf.data;
+		if(len >= buf.count)
+			break;
+		p = memchr(s, sbuf[0], buf.count - len);
 		if(p == nil || (nsbuf > 1 && memcmp(p, sbuf, nsbuf) != 0)){
 			s = p + 1;
 			continue;
