@@ -624,6 +624,10 @@ ekeyboard(Rune k)
 		lastv = -1;
 	e = time(nil);
 	oldsel = sel;
+	if(sele != -1){
+		sele = -1;
+		redraw();
+	}
 	switch(k){
 	case 'q':
 	case Kdel:
