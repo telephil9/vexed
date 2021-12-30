@@ -8,6 +8,7 @@
 #include "a.h"
 
 void redraw(void);
+void drawstatus(void);
 void drawselchange(int);
 
 enum
@@ -402,6 +403,7 @@ drawselchange(int oldsel)
 		if(ol != nl)
 			drawline(ol);
 		drawline(nl);
+		drawstatus();
 		flushimage(display, 1);
 	}
 }
