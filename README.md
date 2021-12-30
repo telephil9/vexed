@@ -12,8 +12,8 @@ Home and End keys go to the beginning and end of the file respectively.
 `x` deletes the currently selected byte.  
 `u` undo last edit.  
 `r` redo last undo'ed edit.  
-`l` look for a byte sequence within the file
-`n' go to next matching occurence of looked sequence
+`l` look for a byte sequence within the file.  
+`n' go to next matching occurence of looked sequence.  
 Del or q exit the program.  
 
 Feel free to drop me an email would you have any feature request.
