@@ -1,6 +1,8 @@
 #include <u.h>
 #include <libc.h>
 #include <draw.h>
+#include <mouse.h>
+#include <keyboard.h>
 #include "a.h"
 
 enum { Stacksize = 1024 };

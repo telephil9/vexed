@@ -41,6 +41,9 @@ void redo(Undo*);
 void pushundo(int, int, uchar, uchar, int);
 void patchundo(uchar);
 
+/* ERROR */
+void showerr(const char*, Mousectl*, Keyboardctl*);
+
 /* COLORS */
 enum
 {

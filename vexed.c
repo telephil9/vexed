@@ -212,12 +212,21 @@ xlook(void)
 	int n, i;
 
 	n = enter("Look:", tmp, sizeof tmp, mctl, kctl, nil);
-	if(n <= 0 || n%2 != 0)
+	if(n <= 0)
 		return;
+	if(n%2 != 0){
+		showerr("invalid byte sequence", mctl, kctl);
+		return;
+	}
 	nsbuf = 0;
 	sindex = -1;
-	for(i = 0; i < n; i += 2)
+	for(i = 0; i < n; i += 2){
+		if(!(isxdigit(tmp[i]) && isxdigit(tmp[i+1]))){
+			showerr("invalid character in byte sequence", mctl, kctl);
+			return;
+		}
 		sbuf[nsbuf++] = 16*hexval(tmp[i]) + hexval(tmp[i+1]);
+	}
 	sbuf[nsbuf] = 0;
 	snprint(sstr, sizeof sstr, "/%s", tmp);
 	if(!search(sel)){
@@ -315,9 +324,10 @@ drawstatus(void)
 	Point p;
 	int x;
 
+	draw(screen, statusr, cols[BACK], nil, ZP);
 	p = string(screen, Pt(statusr.min.x + Padding, statusr.min.y), cols[HEX], ZP, font, filename);
 	if(modified)
-		string(screen, p, cols[HEX], ZP, font, " (modified)");
+		string(screen, p, cols[SCROLL], ZP, font, " (modified)");
 	snprint(b, sizeof b, "%d%%", (int)((100.0 * sel) / buf.count + 0.5));
 	x = statusr.max.x - stringwidth(font, b) - Padding;
 	string(screen, Pt(x, statusr.min.y), cols[HEX], ZP, font, b);
