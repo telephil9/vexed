@@ -24,8 +24,31 @@ enum
 	Scrollwidth = 12,
 };
 
-enum { Mundo, Mredo, Minsert, Mappend, Mdelete, Mgoto, Mlook, Mnext };
-char *menu2str[] = { "undo", "redo", "insert", "append", "delete", "goto", "look", "next", 0 };
+enum {
+	Mundo,
+	Mredo,
+	Msnarfhex,
+	Msnarfascii,
+	Minsert,
+	Mappend,
+	Mdelete,
+	Mgoto,
+	Mlook,
+	Mnext
+};
+char *menu2str[] = { 
+	"undo",
+	"redo",
+	"snarf hex",
+	"snarf ascii",
+	"insert",
+	"append",
+	"delete",
+	"goto",
+	"look",
+	"next",
+	0
+};
 Menu menu2 = { menu2str };
 
 enum { Msave, Mquit, };
@@ -46,6 +69,7 @@ Rectangle statusr;
 int nlines;
 int offset;
 int sel = 0;
+int sele = -1;
 uchar sbuf[255] = {0};
 int nsbuf;
 char  sstr[256] = {0};
@@ -153,6 +177,43 @@ xredo(void)
 	modified = 1;
 	blines = buf.count / 16;
 	redraw();
+}
+
+void
+xsnarfhex(void)
+{
+	int fd, i, n, m;
+
+	fd = open("/dev/snarf", OWRITE|OCEXEC);
+	if(fd < 0)
+		return;
+	if(sele == -1)
+		fprint(fd, "%02X", buf.data[sel]);
+	else{
+		n = sel < sele ? sel : sele;
+		m = sel < sele ? sele : sel;
+		for(i = n; i <= m; i++)
+			fprint(fd, "%02X", buf.data[i]);
+	}
+	close(fd);
+}
+
+void
+xsnarfascii(void)
+{
+	int fd, n, m;
+
+	fd = open("/dev/snarf", OWRITE|OCEXEC);
+	if(fd < 0)
+		return;
+	if(sele == -1)
+		write(fd, &buf.data[sel], 1);
+	else{
+		n = sel < sele ? sel : sele;
+		m = sel < sele ? sele : sel;
+		write(fd, &buf.data[n], m - n + 1);
+	}
+	close(fd);
 }
 
 void
@@ -264,10 +325,24 @@ ensureselvisible(void)
 	return 1;
 }
 
+int
+isselected(int index)
+{
+	int selected;
+
+	if(sele == -1)
+		selected = index == sel;
+	else if(sel < sele)
+		selected = index >= sel && index <= sele;
+	else
+		selected = index >= sele && index <= sel;
+	return selected;
+}
+
 void
 drawline(int line)
 {
-	int y, index, i, n;
+	int y, index, i, n, selected, hs;
 	char b[8] = {0}, *s;
 	Point p;
 	Point p2;
@@ -292,14 +367,25 @@ drawline(int line)
 			break;
 		n = snprint(b, sizeof b, "%02X", buf.data[index + i]);
 		s = isprint(buf.data[index + i]) ? (char*)&buf.data[index + i] : ".";
-		if(index + i == sel){
+		selected = isselected(index + i);
+		if(selected){
 			p = stringnbg(screen, p, cols[BACK], ZP, font, b, n, cols[HEX], ZP);
 			p2 = stringnbg(screen, p2, cols[BACK], ZP, font, s, 1, cols[ASCII], ZP);
 		}else{
 			p = stringn(screen, p, cols[HEX], ZP, font, b, n);
 			p2 = stringn(screen, p2, cols[ASCII], ZP, font, s, 1);
 		}
-		p = stringn(screen, p, cols[BACK], ZP, font, " ", 1);
+		hs = 0;
+		if(selected && sele != -1){
+			if(sel < sele)
+				hs = index + i != sele;
+			else
+				hs = index + i != sel;
+		}
+		if(hs)
+			p = stringnbg(screen, p, cols[BACK], ZP, font, " ", 1, cols[HEX], ZP);
+		else
+			p = stringn(screen, p, cols[BACK], ZP, font, " ", 1);
 	}
 }
 
@@ -414,6 +500,12 @@ menu2hit(void)
 	case Mredo:
 		xredo();
 		break;
+	case Msnarfhex:
+		xsnarfhex();
+		break;
+	case Msnarfascii:
+		xsnarfascii();
+		break;
 	case Mgoto:
 		xgoto();
 		break;
@@ -479,7 +571,15 @@ emouse(Mouse *m)
 			n = indexat(m->xy);
 			if(n >= 0){
 				sel = n;
+				sele = -1;
 				redraw();
+				for(readmouse(mctl); mctl->buttons == 1; readmouse(mctl)){
+					n = indexat(mctl->xy);
+					if(n < 0)
+						break;
+					sele = n;
+					redraw();
+				}
 			}
 		}else if(m->buttons == 2){
 			menu2hit();
