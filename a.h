@@ -41,6 +41,9 @@ void redo(Undo*);
 void pushundo(int, int, uchar, uchar, int);
 void patchundo(uchar);
 
+/* DECODE */
+void showdec(Buffer*, int, Mousectl*, Keyboardctl*);
+
 /* ERROR */
 void showerr(const char*, Mousectl*, Keyboardctl*);
 

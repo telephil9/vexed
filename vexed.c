@@ -30,6 +30,7 @@ enum {
 	Mredo,
 	Msnarfhex,
 	Msnarfascii,
+	Mdecode,
 	Minsert,
 	Mappend,
 	Mdelete,
@@ -42,6 +43,7 @@ char *menu2str[] = {
 	"redo",
 	"snarf hex",
 	"snarf ascii",
+	"decode",
 	"insert",
 	"append",
 	"delete",
@@ -508,6 +510,9 @@ menu2hit(void)
 	case Msnarfascii:
 		xsnarfascii();
 		break;
+	case Mdecode:
+		showdec(&buf, sel, mctl, kctl);
+		break;
 	case Mgoto:
 		xgoto();
 		break;
@@ -709,6 +714,9 @@ ekeyboard(Rune k)
 	case 'n':
 	case 'N':
 		xnext();
+		break;
+	case '?':
+		showdec(&buf, sel, mctl, kctl);
 		break;
 	default:
 		if(isxdigit(k)){
