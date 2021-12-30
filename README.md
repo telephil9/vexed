@@ -14,6 +14,7 @@ Home and End keys go to the beginning and end of the file respectively.
 `r` redo last undo'ed edit.  
 `l` look for a byte sequence within the file.  
 `n` go to next matching occurence of looked sequence.  
+`?` show the decode window that displays bytes as numbers of various sizes.  
 Del or q exit the program.  
 
 Feel free to drop me an email would you have any feature request.
