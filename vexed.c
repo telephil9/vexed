@@ -310,6 +310,17 @@ xnext(void)
 		search(0);
 }
 
+void
+save(void)
+{
+	if(!modified)
+		return;
+	if(writefile(&buf, filename) < 0)
+		sysfatal("writefile: %r");
+	modified = 0;
+	redraw();
+}
+
 int
 selvisible(void)
 {
@@ -542,12 +553,7 @@ menu3hit(void)
 	n = menuhit(3, mctl, &menu3, nil);
 	switch(n){
 	case Msave:
-		if(!modified)
-			return;
-		if(writefile(&buf, filename) < 0)
-			sysfatal("writefile: %r");
-		modified = 0;
-		redraw();
+		save();
 		break;
 	case Mquit:
 		threadexitsall(nil);
@@ -714,6 +720,10 @@ ekeyboard(Rune k)
 	case 'n':
 	case 'N':
 		xnext();
+		break;
+	case 's':
+	case 'S':
+		save();
 		break;
 	case '?':
 		showdec(&buf, sel, mctl, kctl);

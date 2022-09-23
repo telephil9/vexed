@@ -12,6 +12,7 @@ Home and End keys go to the beginning and end of the file respectively.
 `x` deletes the currently selected byte.  
 `u` undo last edit.  
 `r` redo last undo'ed edit.  
+`s` save file.  
 `l` look for a byte sequence within the file.  
 `n` go to next matching occurence of looked sequence.  
 `?` show the decode window that displays bytes as numbers of various sizes.  
