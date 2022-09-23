@@ -31,6 +31,7 @@ enum {
 	Msnarfhex,
 	Msnarfascii,
 	Mdecode,
+	Mbinary,
 	Minsert,
 	Mappend,
 	Mdelete,
@@ -44,6 +45,7 @@ char *menu2str[] = {
 	"snarf hex",
 	"snarf ascii",
 	"decode",
+	"binary",
 	"insert",
 	"append",
 	"delete",
@@ -269,6 +271,28 @@ xappend(void)
 	sel += 1;
 	modified = 1;
 	blines = buf.count/16;
+	redraw();
+}
+
+void
+xbinary(void)
+{
+	char tmp[9] = {0};
+	char msg[19] = "Binary (xxxxxxxx):";
+	char out = 0;
+	int n, i;
+
+	for(i = 0; i < 8; i++)
+		msg[15 - i] = (buf.data[sel] & 1 << i) ? '1' : '0';
+	n = enter(msg, tmp, sizeof tmp, mctl, kctl, nil);
+	if(n <= 0)
+		return;
+	for(i = 0; i < 8 && i < n; i++){
+		if(tmp[7-i] != '0')
+			out |= 1 << i;
+	}
+	buf.data[sel] = out;
+	modified = 1;
 	redraw();
 }
 
@@ -536,6 +560,9 @@ menu2hit(void)
 	case Mappend:
 		xappend();
 		break;
+	case Mbinary:
+		xbinary();
+		break;
 	case Mlook:
 		xlook();
 		break;
@@ -712,6 +739,9 @@ ekeyboard(Rune k)
 	case 'p':
 	case 'P':
 		xappend();
+		break;
+	case '.':
+		xbinary();
 		break;
 	case 'l':
 	case 'L':

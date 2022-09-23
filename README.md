@@ -10,6 +10,7 @@ Home and End keys go to the beginning and end of the file respectively.
 `i` inserts a byte before the current selection.  
 `p` inserts a byte after the current selection.  
 `x` deletes the currently selected byte.  
+`.` edit selected byte in binary.  
 `u` undo last edit.  
 `r` redo last undo'ed edit.  
 `s` save file.  
