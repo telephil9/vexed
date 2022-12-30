@@ -407,7 +407,7 @@ drawline(int line)
 		s = isprint(buf.data[index + i]) ? (char*)&buf.data[index + i] : ".";
 		selected = isselected(index + i);
 		if(selected){
-			p = stringnbg(screen, p, cols[BACK], ZP, font, b, n, cols[HEX], ZP);
+			p = stringnbg(screen, p, cols[HHEX], ZP, font, b, n, cols[HIGH], ZP);
 			p2 = stringnbg(screen, p2, cols[BACK], ZP, font, s, 1, cols[ASCII], ZP);
 		}else{
 			p = stringn(screen, p, cols[HEX], ZP, font, b, n);
@@ -421,7 +421,7 @@ drawline(int line)
 				hs = index + i != sel;
 		}
 		if(hs)
-			p = stringnbg(screen, p, cols[BACK], ZP, font, " ", 1, cols[HEX], ZP);
+			p = stringnbg(screen, p, cols[BACK], ZP, font, " ", 1, cols[HIGH], ZP);
 		else
 			p = stringn(screen, p, cols[BACK], ZP, font, " ", 1);
 	}
@@ -802,7 +802,7 @@ threadmain(int argc, char *argv[])
 	reverse = 0;
 	ARGBEGIN{
 	case 'b':
-		reverse = 1;
+		reverse = ~0xFF;
 		break;
 	default:
 		usage();

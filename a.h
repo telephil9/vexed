@@ -54,6 +54,8 @@ enum
 	ADDR,
 	HEX,
 	ASCII,
+	HHEX,
+	HIGH,
 	SCROLL,
 	NCOLS,
 };
