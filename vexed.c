@@ -71,6 +71,8 @@ int scrollsize;
 Rectangle scrollr;
 Rectangle viewr;
 Rectangle statusr;
+int scrolling;
+int lastbuttons;
 int nlines;
 int offset;
 int sel = 0;
@@ -486,6 +488,15 @@ redraw(void)
 	flushimage(display, 1);
 }
 
+void
+clampoffset(void)
+{
+	if(offset < 0)
+		offset = 0;
+	if(offset + blines%nlines >= blines)
+		offset = blines - blines%nlines;
+}
+
 int
 scroll(int lines)
 {
@@ -497,10 +508,7 @@ scroll(int lines)
 		return 0;
 	}
 	offset += lines;
-	if(offset < 0)
-		offset = 0;
-	if(offset + blines%nlines >= blines)
-		offset = blines - blines%nlines;
+	clampoffset();
 	sel += lines * 16;
 	if(sel < 0)
 		sel = 0;
@@ -593,13 +601,17 @@ emouse(Mouse *m)
 {
 	int n;
 
-	if(ptinrect(m->xy, scrollr)){
+	if(lastbuttons == 0 && m->buttons != 0 && ptinrect(m->xy, scrollr))
+		scrolling = 1;
+	else if(m->buttons == 0)
+		scrolling = 0;
+	if(scrolling){
 		if(m->buttons == 1){
 			n = (m->xy.y - scrollr.min.y) / font->height;
 			scroll(-n);
 		}else if(m->buttons == 2){
-			n = (m->xy.y - scrollr.min.y) * blines / Dy(scrollr);
-			offset = n;
+			offset = (m->xy.y - scrollr.min.y) * blines / Dy(scrollr);
+			clampoffset();
 			sel = offset*16;
 			redraw();
 		}else if(m->buttons == 4){
@@ -631,6 +643,7 @@ emouse(Mouse *m)
 			scroll(scrollsize);
 		}
 	}
+	lastbuttons = m->buttons;
 }
 
 void
@@ -799,6 +812,8 @@ threadmain(int argc, char *argv[])
 	};
 	int reverse;
 
+	scrolling = 0;
+	lastbuttons = 0;
 	reverse = 0;
 	ARGBEGIN{
 	case 'b':
