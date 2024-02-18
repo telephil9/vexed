@@ -55,6 +55,7 @@ enum
 	HEX,
 	ASCII,
 	HHEX,
+	DHEX,
 	HIGH,
 	SCROLL,
 	NCOLS,
