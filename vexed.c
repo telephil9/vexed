@@ -22,7 +22,7 @@ enum
 {
 	Padding = 4,
 	Spacing = 8,
-	Scrollwidth = 12,
+	Scrollwidth = 14,
 };
 
 enum {
@@ -450,17 +450,20 @@ drawselchange(int oldsel)
 void
 drawstatus(void)
 {
-	char b[16] = {0};
+	char b[64] = {0};
 	Point p;
-	int x;
+	int x, y;
 
 	draw(screen, statusr, cols[BACK], nil, ZP);
-	p = string(screen, Pt(statusr.min.x + Padding, statusr.min.y), cols[HEX], ZP, font, filename);
+	y = statusr.min.y + Padding;
+	p = string(screen, Pt(statusr.min.x + Padding, y), cols[HEX], ZP, font, filename);
 	if(modified)
 		string(screen, p, cols[SCROLL], ZP, font, " (modified)");
 	snprint(b, sizeof b, "%d/%zld (%d%%)", sel+1, buf.count, (int)((100.0 * sel) / buf.count + 0.5));
 	x = statusr.max.x - stringwidth(font, b) - Padding;
-	string(screen, Pt(x, statusr.min.y), cols[HEX], ZP, font, b);
+	string(screen, Pt(x, y), cols[HEX], ZP, font, b);
+	y = statusr.max.y;
+	line(screen, Pt(statusr.min.x, y), Pt(statusr.max.x, y), 0, 0, 0, cols[HEX], ZP);
 }
 
 void
@@ -475,12 +478,13 @@ redraw(void)
 	if(blines > 0){
 		h = ((double)nlines / blines) * Dy(scrollr);
 		y = ((double)offset / blines) * Dy(scrollr);
+		if(h == 0) h = 5;
 		ye = scrollr.min.y + y + h - 1;
 		if(ye >= scrollr.max.y)
 			ye = scrollr.max.y - 1;
-		scrposr = Rect(scrollr.min.x + 1, scrollr.min.y + y + 1, scrollr.max.x - 1, ye);
+		scrposr = Rect(scrollr.min.x, scrollr.min.y + y, scrollr.max.x - 1, ye);
 	}else
-		scrposr = insetrect(scrollr, -1);
+		scrposr = Rect(scrollr.min.x, scrollr.min.y, scrollr.max.x-1, scrollr.max.y);
 	draw(screen, scrposr, cols[BACK], nil, ZP);
 	for(i = 0; i < nlines; i++)
 		drawline(i);
@@ -649,14 +653,16 @@ emouse(Mouse *m)
 void
 eresize(void)
 {
+	Rectangle sr;
 	int w, x;
 
-	statusr = Rect(screen->r.min.x + Padding, screen->r.max.y - Padding - font->height, screen->r.max.x - Padding, screen->r.max.y - Padding);
-	scrollr = Rect(screen->r.min.x + Padding, screen->r.min.y + Padding, screen->r.min.x + Padding + Scrollwidth, statusr.min.y - Padding);
+	sr = screen->r;
+	statusr = Rect(sr.min.x, sr.min.y, sr.max.x, sr.min.x + Padding + font->height + 1);
+	scrollr = insetrect(Rect(sr.min.x, statusr.max.y+1, sr.min.x+Scrollwidth, sr.max.y), 1);
 	sw = stringwidth(font, " ");
 	w = Padding + 6*sw + 2*Spacing + 16*3*sw-sw + 2*Spacing + 16*sw + Padding;
 	x = scrollr.max.x + Padding;
-	viewr = Rect(x, screen->r.min.y + Padding, x + w, statusr.min.y - Padding);
+	viewr = insetrect(Rect(x, statusr.max.y + 1, x + w, sr.max.y + Padding - 2), Padding);
 	nlines = Dy(viewr) / font->height;
 	scrollsize = mousescrollsize(nlines);
 	redraw();
