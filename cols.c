@@ -14,6 +14,7 @@ initcols(int reverse)
 		cols[HEX]    = display->white;
 		cols[ASCII]  = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DPurpleblue);
 		cols[HHEX]	 = display->black;
+		cols[DHEX]	 = allocimage(display, Rect(0,0,1,1), screen->chan, 1, 0xAAAAAAFF^reverse);
 		cols[HIGH]	 = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DPurpleblue);
 		cols[SCROLL] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, 0x999999FF^reverse);
 	}else{
@@ -22,6 +23,7 @@ initcols(int reverse)
 		cols[HEX]    = display->black;
 		cols[ASCII]  = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DGreygreen);
 		cols[HHEX]	 = display->black;
+		cols[DHEX]	 = allocimage(display, Rect(0,0,1,1), screen->chan, 1, 0xAAAAAAFF);
 		cols[HIGH]   = allocimage(display, Rect(0,0,1,1), screen->chan, 1, 0xCCCCCCFF);
 		cols[SCROLL] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, 0x999999FF);
 	}

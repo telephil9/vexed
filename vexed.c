@@ -81,6 +81,7 @@ uchar sbuf[255] = {0};
 int nsbuf;
 char  sstr[256] = {0};
 int sindex = -1;
+int dimnul;
 
 int
 hexval(Rune k)
@@ -386,6 +387,7 @@ drawline(int line)
 	char b[8] = {0}, *s;
 	Point p;
 	Point p2;
+	Image *c;
 	
 	y = viewr.min.y + line * font->height;
 	index = (line + offset)*16;
@@ -412,7 +414,8 @@ drawline(int line)
 			p = stringnbg(screen, p, cols[HHEX], ZP, font, b, n, cols[HIGH], ZP);
 			p2 = stringnbg(screen, p2, cols[BACK], ZP, font, s, 1, cols[ASCII], ZP);
 		}else{
-			p = stringn(screen, p, cols[HEX], ZP, font, b, n);
+			c = dimnul && buf.data[index+i] == 0 ? cols[DHEX] : cols[HEX];
+			p = stringn(screen, p, c, ZP, font, b, n);
 			p2 = stringn(screen, p2, cols[ASCII], ZP, font, s, 1);
 		}
 		hs = 0;
@@ -821,9 +824,13 @@ threadmain(int argc, char *argv[])
 	scrolling = 0;
 	lastbuttons = 0;
 	reverse = 0;
+	dimnul = 0;
 	ARGBEGIN{
 	case 'b':
 		reverse = ~0xFF;
+		break;
+	case 'd':
+		dimnul = 1;
 		break;
 	default:
 		usage();
