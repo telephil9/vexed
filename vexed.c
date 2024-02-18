@@ -458,7 +458,7 @@ drawstatus(void)
 	p = string(screen, Pt(statusr.min.x + Padding, statusr.min.y), cols[HEX], ZP, font, filename);
 	if(modified)
 		string(screen, p, cols[SCROLL], ZP, font, " (modified)");
-	snprint(b, sizeof b, "%d%%", (int)((100.0 * sel) / buf.count + 0.5));
+	snprint(b, sizeof b, "%d/%zld (%d%%)", sel+1, buf.count, (int)((100.0 * sel) / buf.count + 0.5));
 	x = statusr.max.x - stringwidth(font, b) - Padding;
 	string(screen, Pt(x, statusr.min.y), cols[HEX], ZP, font, b);
 }
