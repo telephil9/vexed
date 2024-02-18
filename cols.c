@@ -5,27 +5,38 @@
 #include <keyboard.h>
 #include "a.h"
 
+Image*
+ecolor(ulong n)
+{
+	Image *i;
+
+	i = allocimage(display, Rect(0, 0, 1, 1), screen->chan, 1, n);
+	if(i == nil)
+		sysfatal("allocimage: %r");
+	return i;
+}
+
 void
 initcols(int reverse)
 {
 	if(reverse){
 		cols[BACK]   = display->black;
-		cols[ADDR]   = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DPurpleblue);
+		cols[ADDR]   = ecolor(DPurpleblue);
 		cols[HEX]    = display->white;
-		cols[ASCII]  = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DPurpleblue);
+		cols[ASCII]  = ecolor(DPurpleblue);
 		cols[HHEX]	 = display->black;
-		cols[DHEX]	 = allocimage(display, Rect(0,0,1,1), screen->chan, 1, 0xAAAAAAFF^reverse);
-		cols[HIGH]	 = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DPurpleblue);
-		cols[SCROLL] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, 0x999999FF^reverse);
+		cols[DHEX]	 = ecolor(0xAAAAAAFF^reverse);
+		cols[HIGH]	 = ecolor(DPurpleblue);
+		cols[SCROLL] = ecolor(0x999999FF^reverse);
 	}else{
 		cols[BACK]   = display->white;
-		cols[ADDR]   = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DGreygreen);
+		cols[ADDR]   = ecolor(DGreygreen);
 		cols[HEX]    = display->black;
-		cols[ASCII]  = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DGreygreen);
+		cols[ASCII]  = ecolor(DGreygreen);
 		cols[HHEX]	 = display->black;
-		cols[DHEX]	 = allocimage(display, Rect(0,0,1,1), screen->chan, 1, 0xAAAAAAFF);
-		cols[HIGH]   = allocimage(display, Rect(0,0,1,1), screen->chan, 1, 0xCCCCCCFF);
-		cols[SCROLL] = allocimage(display, Rect(0,0,1,1), screen->chan, 1, 0x999999FF);
+		cols[DHEX]	 = ecolor(0xAAAAAAFF);
+		cols[HIGH]   = ecolor(0xCCCCCCFF);
+		cols[SCROLL] = ecolor(0x999999FF);
 	}
 }
 
