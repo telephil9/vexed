@@ -28,7 +28,7 @@ u16(uchar b[8])
 
 	r = 0;
 	for(i = 0; i < 2; i++)
-		r += (u16int)(b[6 + i] << 8*i);
+		r += (u16int)(b[6 + i] << 8*(2-i-1));
 	return r;
 }
 
@@ -40,7 +40,7 @@ s16(uchar b[8])
 
 	r = 0;
 	for(i = 0; i < 2; i++)
-		r += (s16int)(b[6 + i] << 8*i);
+		r += (s16int)(b[6 + i] << 8*(2-i-1));
 	return r;
 }
 
@@ -52,7 +52,7 @@ u32(uchar b[8])
 
 	r = 0;
 	for(i = 0; i < 4; i++)
-		r += (u32int)(b[4 + i] << 8*i);
+		r += (u32int)(b[4 + i] << 8*(4-i-1));
 	return r;
 }
 
@@ -64,7 +64,7 @@ s32(uchar b[8])
 
 	r = 0;
 	for(i = 0; i < 4; i++)
-		r += (s32int)(b[4 + i] << 8*i);
+		r += (s32int)(b[4 + i] << 8*(4-i-1));
 	return r;
 }
 
@@ -76,7 +76,7 @@ u64(uchar b[8])
 
 	r = 0;
 	for(i = 0; i < 8; i++)
-		r += (u64int)(b[i] << 8*i); 
+		r += (u64int)(b[i] << 8*(8-i-1)); 
 	return r;
 }
 
@@ -88,7 +88,7 @@ s64(uchar b[8])
 
 	r = 0;
 	for(i = 0; i < 8; i++)
-		r += (s64int)(b[i] << 8*i);
+		r += (s64int)(b[i] << 8*(8-i-1));
 	return r;
 }
 
