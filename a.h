@@ -42,7 +42,7 @@ void pushundo(int, int, uchar, uchar, int);
 void patchundo(uchar);
 
 /* DECODE */
-void showdec(Buffer*, int, Mousectl*, Keyboardctl*);
+void showdec(uchar[8], Mousectl*, Keyboardctl*);
 
 /* ERROR */
 void showerr(const char*, Mousectl*, Keyboardctl*);

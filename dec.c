@@ -9,141 +9,137 @@
 enum { Padding = 12, };
 
 u8int
-u8(Buffer *buf, int index)
+u8(uchar buf[8])
 {
-	return (u8int)buf->data[index];
+	return (u8int)buf[7];
 }
 
 s8int
-s8(Buffer *buf, int index)
+s8(uchar b[8])
 {
-	return (s8int)buf->data[index];
+	return (s8int)b[7];
 }
 
 u16int
-u16(Buffer *buf, int index)
+u16(uchar b[8])
 {
-	int i;
 	u16int r;
+	int i;
 
 	r = 0;
-	for(i = 0; i < 2 && index + i < buf->count; i++)
-		r += ((u16int)buf->data[index+i]) << 8*i;
+	for(i = 0; i < 2; i++)
+		r += (u16int)(b[6 + i] << 8*i);
 	return r;
 }
 
 s16int
-s16(Buffer *buf, int index)
+s16(uchar b[8])
 {
-	int i;
 	s16int r;
+	int i;
 
 	r = 0;
-	for(i = 0; i < 2 && index + i < buf->count; i++)
-		r += ((s16int)buf->data[index+i]) << 8*i;
+	for(i = 0; i < 2; i++)
+		r += (s16int)(b[6 + i] << 8*i);
 	return r;
 }
 
 u32int
-u32(Buffer *buf, int index)
+u32(uchar b[8])
 {
-	int i;
 	u32int r;
+	int i;
 
 	r = 0;
-	for(i = 0; i < 4 && index + i < buf->count; i++)
-		r += ((u32int)buf->data[index+i]) << 8*i;
+	for(i = 0; i < 4; i++)
+		r += (u32int)(b[4 + i] << 8*i);
 	return r;
 }
 
 s32int
-s32(Buffer *buf, int index)
+s32(uchar b[8])
 {
-	int i;
 	s32int r;
+	int i;
 
 	r = 0;
-	for(i = 0; i < 4 && index + i < buf->count; i++)
-		r += ((s32int)buf->data[index+i]) << 8*i;
+	for(i = 0; i < 4; i++)
+		r += (s32int)(b[4 + i] << 8*i);
 	return r;
 }
 
 u64int
-u64(Buffer *buf, int index)
+u64(uchar b[8])
 {
-	int i;
 	u64int r;
+	int i;
 
 	r = 0;
-	for(i = 0; i < 8 && index + i < buf->count; i++)
-		r += ((u64int)buf->data[index+i]) << 8*i;
+	for(i = 0; i < 8; i++)
+		r += (u64int)(b[i] << 8*i); 
 	return r;
 }
 
 s64int
-s64(Buffer *buf, int index)
+s64(uchar b[8])
 {
-	int i;
 	s64int r;
+	int i;
 
 	r = 0;
-	for(i = 0; i < 8 && index + i < buf->count; i++)
-		r += ((s64int)buf->data[index+i]) << 8*i;
+	for(i = 0; i < 8; i++)
+		r += (s64int)(b[i] << 8*i);
 	return r;
 }
 
 float
-f32(Buffer *buf, int index)
+f32(uchar b[8])
 {
 	union { uchar b[4]; float f; } v;
-	int i;
 
-	for(i = 0; i < 4 && index + i < buf->count; i++)
-		v.b[i] = buf->data[index + i];
+	memcpy(v.b, &b[4], 4);
 	return v.f;
 }
 
 double
-f64(Buffer *buf, int index)
+f64(uchar b[8])
 {
 	union { uchar b[8]; double d; } v;
-	int i;
 
-	for(i = 0; i < 8 && index + i < buf->count; i++)
-		v.b[i] = buf->data[index + i];
+	memcpy(v.b, b, 8);
 	return v.d;
 }
 
 void
-dec(Buffer *buf, int index, Image *b, Point o, Point p, Image *fg)
+dec(uchar buf[8], Image *b, Point o, Point p, Image *fg)
 {
 	char tmp[64] = {0};
 	int n;
 
 	p = string(b, p, fg, ZP, font, "  in: ");
-	for(n = 0; n < 8 && index + n < buf->count; n++){
-		snprint(tmp, sizeof tmp, "%02X ", buf->data[index + n]);
+	for(n = 0; n < 8; n++){
+		snprint(tmp, sizeof tmp, "%02X ", buf[n]);
 		p = string(b, p, fg, ZP, font, tmp);
 	}
 	p = addpt(o, Pt(Padding, 2*Padding + font->height));
-	snprint(tmp, sizeof tmp, "%5s %-20ud %5s %-20d", "u8:", u8(buf, index), "s8:", s8(buf, index));
+	snprint(tmp, sizeof tmp, "%5s %-20ud %5s %-20d", "u8:", u8(buf), "s8:", s8(buf));
 	string(b, p, fg, ZP, font, tmp);
 	p.y += font->height;
-	snprint(tmp, sizeof tmp, "%5s %-20ud %5s %-20d", "u16:", u16(buf, index), "s16:", s16(buf, index));
+	snprint(tmp, sizeof tmp, "%5s %-20ud %5s %-20d", "u16:", u16(buf), "s16:", s16(buf));
 	string(b, p, fg, ZP, font, tmp);
 	p.y += font->height;
-	snprint(tmp, sizeof tmp, "%5s %-20ud %5s %-20d", "u32:", u32(buf, index), "s32:", s32(buf, index));
+	snprint(tmp, sizeof tmp, "%5s %-20ud %5s %-20d", "u32:", u32(buf), "s32:", s32(buf));
 	string(b, p, fg, ZP, font, tmp);
 	p.y += font->height;
-	snprint(tmp, sizeof tmp, "%5s %-20llud %5s %-20lld", "u64:", u64(buf, index), "s64:", s64(buf, index));
+	snprint(tmp, sizeof tmp, "%5s %-20llud %5s %-20lld", "u64:", u64(buf), "s64:", s64(buf));
 	string(b, p, fg, ZP, font, tmp);
 	p.y += font->height;
-	snprint(tmp, sizeof tmp, "%5s %-20e %5s %-20e", "f32:", f32(buf, index), "f64:", f64(buf, index));
+	snprint(tmp, sizeof tmp, "%5s %-20e %5s %-20e", "f32:", f32(buf), "f64:", f64(buf));
 	string(b, p, fg, ZP, font, tmp);
 }
 
 void
-showdec(Buffer *buf, int index, Mousectl *mctl, Keyboardctl *kctl)
+showdec(uchar buf[8], Mousectl *mctl, Keyboardctl *kctl)
 {
 	Alt alts[3];
 	Rectangle r, sc;
@@ -187,7 +183,7 @@ showdec(Buffer *buf, int index, Mousectl *mctl, Keyboardctl *kctl)
 		draw(b, r, bg, nil, ZP);
 		border(b, r, 2, bord, ZP);
 		p = addpt(o, Pt(Padding, Padding));
-		dec(buf, index, b, o, p, fg);
+		dec(buf, b, o, p, fg);
 		flushimage(display, 1);
 		if(b!=screen || !eqrect(screen->clipr, sc)){
 			freeimage(save);

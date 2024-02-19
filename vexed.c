@@ -340,7 +340,22 @@ xnext(void)
 void
 xdecode(void)
 {
-	showdec(&buf, sel, mctl, kctl);
+	uchar b[8] = {0};
+	int n, m, c;
+
+	if(sele == -1){
+		b[7] = buf.data[sel];
+	}else{
+		n = sel < sele ? sel : sele;
+		m = sel < sele ? sele : sel;
+		c = m - n + 1;
+		if(c > 8){
+			showerr("cannot decode more than 8 bytes", mctl, kctl);
+			return;
+		}
+		memcpy(&b[8 - c], &buf.data[n], c);
+	}
+	showdec(b, mctl, kctl);
 }
 
 void
