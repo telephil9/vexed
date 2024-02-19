@@ -338,6 +338,12 @@ xnext(void)
 }
 
 void
+xdecode(void)
+{
+	showdec(&buf, sel, mctl, kctl);
+}
+
+void
 save(void)
 {
 	if(!modified)
@@ -561,7 +567,7 @@ menu2hit(void)
 		xsnarfascii();
 		break;
 	case Mdecode:
-		showdec(&buf, sel, mctl, kctl);
+		xdecode();
 		break;
 	case Mgoto:
 		xgoto();
@@ -660,7 +666,7 @@ eresize(void)
 	int w, x;
 
 	sr = screen->r;
-	statusr = Rect(sr.min.x, sr.min.y, sr.max.x, sr.min.x + Padding + font->height + 1);
+	statusr = Rect(sr.min.x, sr.min.y, sr.max.x, sr.min.y + Padding + font->height + 1);
 	scrollr = insetrect(Rect(sr.min.x, statusr.max.y+1, sr.min.x+Scrollwidth, sr.max.y), 1);
 	sw = stringwidth(font, " ");
 	w = Padding + 6*sw + 2*Spacing + 16*3*sw-sw + 2*Spacing + 16*sw + Padding;
@@ -778,7 +784,7 @@ ekeyboard(Rune k)
 		save();
 		break;
 	case '?':
-		showdec(&buf, sel, mctl, kctl);
+		xdecode();
 		break;
 	default:
 		if(isxdigit(k)){
